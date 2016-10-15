@@ -705,9 +705,16 @@ function generateTests(prefix, apiCreator) {
 	test(prefix + 'caching is enabled by default', function (t) {
 		t.plan(3);
 		rimraf.sync(path.join(__dirname, 'fixture/caching/node_modules'));
+
+		var prevCwd = process.cwd();
+		process.chdir(path.join(__dirname, 'fixture/caching'));
+
 		var api = apiCreator();
 
 		return api.run([path.join(__dirname, 'fixture/caching/test.js')])
+			.finally(function () {
+				process.chdir(prevCwd);
+			})
 			.then(function () {
 				var files = fs.readdirSync(path.join(__dirname, 'fixture/caching/node_modules/.cache/ava'));
 				t.is(files.length, 2);
@@ -728,9 +735,16 @@ function generateTests(prefix, apiCreator) {
 	test(prefix + 'caching can be disabled', function (t) {
 		t.plan(1);
 		rimraf.sync(path.join(__dirname, 'fixture/caching/node_modules'));
+
+		var prevCwd = process.cwd();
+		process.chdir(path.join(__dirname, 'fixture/caching'));
+
 		var api = apiCreator({cacheEnabled: false});
 
 		return api.run([path.join(__dirname, 'fixture/caching/test.js')])
+			.finally(function () {
+				process.chdir(prevCwd);
+			})
 			.then(function () {
 				t.false(fs.existsSync(path.join(__dirname, 'fixture/caching/node_modules/.cache/ava')));
 				t.end();
